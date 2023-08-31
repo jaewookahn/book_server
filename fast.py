@@ -19,7 +19,7 @@ def read_item(item_id: int, q: Union[str, None] = None):
 @app.get("/books/{book_path:path}")
 def get_book(book_path):
     file_root = '/data/'
-    book_path_decoded = urllib.parse.unquote(book_path)
+    book_path_decoded = urllib.parse.unquote_plus(book_path)
     file_path = f'{file_root}/{book_path_decoded}'
     #return {'file_path': file_path, 'original': book_path}
     return FileResponse(file_path)
