@@ -2,6 +2,7 @@ from typing import Union
 
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
+from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import StreamingResponse
 import urllib.parse
@@ -67,12 +68,13 @@ def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
 @app.get("/books/cover/{book_path:path}")
-def get_book_cover(book_path):
+async def get_book_cover(book_path):
     file_path = get_book_file_path(book_path)
     cover_image = get_cover(file_path)
     
     image_type = cover_image.file_name.split('.')[-1]
-    return StreamingResponse(io.BytesIO(cover_image.content), media_type=f"image/{image_type}")
+    #return StreamingResponse(io.BytesIO(cover_image.content), media_type=f"image/{image_type}")
+    return Response(content=cover_image.content) 
 
 @app.get('/books/thumbnail/{book_path:path}')
 def get_book_cover_thumbnail(book_path):
@@ -84,15 +86,14 @@ def get_book_cover_thumbnail(book_path):
     with io.BytesIO() as output:
         pimg.save(output, format='png')
         pcontents = output.getvalue()
-
-    return StreamingResponse(io.BytesIO(pcontents), media_type='image/png')
+    return Response(content=pcontents)
  
 @app.get("/file/{path}")
-async def get_file(path):
+def get_file(path):
     some_file_path = f'/data/{path}'
     return FileResponse(some_file_path)
 
 @app.get('/books/file/{book_path:path}')
-def get_book_file(book_path):
+async def get_book_file(book_path):
     file_path = get_book_file_path(book_path)
     return FileResponse(file_path)
