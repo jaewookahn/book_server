@@ -27,6 +27,11 @@ def get_cover(file_path):
     images = [image for image in book.get_items_of_type(ebooklib.ITEM_IMAGE)]
     found = images[0]
     for image in images:
+    #for item in book.items:
+    #    if item.get_type() == ebooklib.ITEM_DOCUMENT:
+    #        continue
+
+        #if 'cover' in str(image.get_type()):
         if image.file_name.find('cover') >= 0:
             found = image
             break
@@ -73,3 +78,8 @@ def get_book_cover_thumbnail(book_path):
 async def get_file(path):
     some_file_path = f'/data/{path}'
     return FileResponse(some_file_path)
+
+@app.get('/books/file/{book_path:path}')
+def get_book_file(book_path):
+    file_path = get_book_file_path(book_path)
+    return FileResponse(file_path)
