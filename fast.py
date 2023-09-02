@@ -25,17 +25,30 @@ def get_cover(file_path):
     book = epub.read_epub(file_path)
 
     images = [image for image in book.get_items_of_type(ebooklib.ITEM_IMAGE)]
-    found = images[0]
+    found = None
     for image in images:
-    #for item in book.items:
-    #    if item.get_type() == ebooklib.ITEM_DOCUMENT:
-    #        continue
-
-        #if 'cover' in str(image.get_type()):
         if image.file_name.find('cover') >= 0:
             found = image
             break
-    return image
+    if not found:
+        try:
+            cover_id = book.metadata['http://www.idpf.org/2007/opf']['cover'][0][1]['content']
+        except:
+            cover_id = ''
+        
+        for image in images:
+            if image.id == cover_id:
+                found = image
+                break
+
+    if not found:
+        found = images[0]
+
+
+    del(images)
+    del(book)
+
+    return found
 
 def get_book_file_path(book_path):
     file_root = '/data/'
