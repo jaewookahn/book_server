@@ -11,6 +11,8 @@ from ebooklib import epub
 import ebooklib
 import io
 from PIL import Image
+import gc
+import copy
 
 app = FastAPI()
 app.add_middleware(
@@ -45,11 +47,14 @@ def get_cover(file_path):
     if not found:
         found = images[0]
 
+    cover_content = copy.deepcopy(found.content)
+    cover_file_name = copy.deepcopy(found.file_name)
 
-    del(images)
-    del(book)
+    del found
+    del images
+    del book
 
-    return found
+    return cover_content, cover_file_name
 
 def get_book_file_path(book_path):
     file_root = '/data/'
@@ -70,23 +75,24 @@ def read_item(item_id: int, q: Union[str, None] = None):
 @app.get("/books/cover/{book_path:path}")
 async def get_book_cover(book_path):
     file_path = get_book_file_path(book_path)
-    cover_image = get_cover(file_path)
+    cover_image_content, cover_image_file_name = get_cover(file_path)
     
-    image_type = cover_image.file_name.split('.')[-1]
+    image_type = cover_image_file_name.split('.')[-1]
     #return StreamingResponse(io.BytesIO(cover_image.content), media_type=f"image/{image_type}")
-    return Response(content=cover_image.content) 
+    return Response(content=cover_image_content) 
 
 @app.get('/books/thumbnail/{book_path:path}')
 def get_book_cover_thumbnail(book_path):
     file_path = get_book_file_path(book_path)
-    cover_image = get_cover(file_path)
+    cover_image_content, cover_image_file_name = get_cover(file_path)
 
-    pimg = Image.open(io.BytesIO(cover_image.content))
+    pimg = Image.open(io.BytesIO(cover_image_content))
     pimg.thumbnail((100,100))
     with io.BytesIO() as output:
         pimg.save(output, format='png')
         pcontents = output.getvalue()
-    return Response(content=pcontents)
+        gc.collect()
+    return Response(content=pcontents, media_type='image/png')#, header={'Content-Length': len(pcontents)})
  
 @app.get("/file/{path}")
 def get_file(path):
@@ -97,3 +103,7 @@ def get_file(path):
 async def get_book_file(book_path):
     file_path = get_book_file_path(book_path)
     return FileResponse(file_path)
+
+@app.get('/gc')
+def do_gc():
+    gc.collect()
