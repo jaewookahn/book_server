@@ -23,11 +23,15 @@ app.add_middleware(
         allow_headers=['*']
         )
 
-
 def get_cover(file_path):
+
     book = epub.read_epub(file_path)
 
     images = [image for image in book.get_items_of_type(ebooklib.ITEM_IMAGE)]
+
+    if len(images) == 0:
+        return open('book-small.png', 'rb').read(), 'cover-small.png'
+
     found = None
     for image in images:
         if image.file_name.find('cover') >= 0:
