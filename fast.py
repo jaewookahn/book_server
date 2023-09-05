@@ -37,7 +37,7 @@ def get_cover(file_path):
 
     found = None
     for image in images:
-        if image.file_name.find('cover') >= 0:
+        if image.file_name.find('cover') >= 0 and image.file_name.find('incover') < 0:
             found = image
             break
 
