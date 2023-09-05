@@ -36,11 +36,8 @@ def get_cover(file_path):
         return open('book-small.png', 'rb').read(), 'cover-small.png'
 
     found = None
-    for image in images:
-        if image.file_name.find('cover') >= 0 and image.file_name.find('incover') < 0:
-            found = image
-            break
 
+    # check metadata
     if not found:
         try:
             cover_id = book.metadata['http://www.idpf.org/2007/opf']['cover'][0][1]['content']
@@ -52,6 +49,14 @@ def get_cover(file_path):
                 found = image
                 break
 
+    # check file anme
+    if not found:
+        for image in images:
+            if image.file_name.find('cover') >= 0 and image.file_name.find('incover') < 0:
+                found = image
+                break
+
+    # simply the first image
     if not found:
         found = images[0]
 
