@@ -56,9 +56,13 @@ def get_cover(file_path):
                 found = image
                 break
 
-    # simply the first image
+    # simply the first image (large enough 200x200)
     if not found:
-        found = images[0]
+        for image in images:
+            w, h = Image.open(io.BytesIO(image.content)).size
+            if w > 200 and h > 200:
+                found = image
+                break
 
     cover_content = copy.deepcopy(found.content)
     cover_file_name = copy.deepcopy(found.file_name)
@@ -100,7 +104,7 @@ def get_book_cover_thumbnail(book_path):
     cover_image_content, cover_image_file_name = get_cover(file_path)
 
     pimg = Image.open(io.BytesIO(cover_image_content))
-    pimg.thumbnail((100,100))
+    pimg.thumbnail((150,150))
     with io.BytesIO() as output:
         pimg.save(output, format='png')
         pcontents = output.getvalue()
