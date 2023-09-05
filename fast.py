@@ -25,7 +25,10 @@ app.add_middleware(
 
 def get_cover(file_path):
 
-    book = epub.read_epub(file_path)
+    try:
+        book = epub.read_epub(file_path)
+    except:
+        return open('book-small-error.png', 'rb').read(), 'cover-error.png'
 
     images = [image for image in book.get_items_of_type(ebooklib.ITEM_IMAGE)]
 
@@ -37,6 +40,7 @@ def get_cover(file_path):
         if image.file_name.find('cover') >= 0:
             found = image
             break
+
     if not found:
         try:
             cover_id = book.metadata['http://www.idpf.org/2007/opf']['cover'][0][1]['content']
