@@ -31,6 +31,7 @@ def get_cover(file_path):
         return open('book-small-error.png', 'rb').read(), 'cover-error.png'
 
     images = [image for image in book.get_items_of_type(ebooklib.ITEM_IMAGE)]
+    covers = [cover for cover in book.get_items_of_type(ebooklib.ITEM_COVER)]
 
     if len(images) == 0:
         return open('book-small.png', 'rb').read(), 'cover-small.png'
@@ -49,10 +50,17 @@ def get_cover(file_path):
                 found = image
                 break
 
-    # check file anme
+    # check file name
+
+    if not found:
+        for cover in covers:
+            if cover.file_name.lower().find('cover') >= 0:
+                found = cover
+                break
+
     if not found:
         for image in images:
-            if image.file_name.find('cover') >= 0 and image.file_name.find('incover') < 0:
+            if image.file_name.lower().find('cover') >= 0 and image.file_name.lower().find('incover') < 0:
                 found = image
                 break
 
